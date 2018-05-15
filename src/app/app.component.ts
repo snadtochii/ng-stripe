@@ -1,4 +1,3 @@
-import { Component } from '@angular/core';
 import {
   Component,
   AfterViewInit,
@@ -9,6 +8,9 @@ import {
 } from '@angular/core';
 
 import { NgForm } from '@angular/forms';
+
+declare var stripe: any;
+declare var elements: any;
 
 @Component({
   selector: 'app-root',
@@ -25,7 +27,19 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   constructor(private cd: ChangeDetectorRef) {}
 
   ngAfterViewInit() {
-    this.card = elements.create('card');
+    const style = {
+      base: {
+        lineHeight: '24px',
+        fontFamily: 'monospace',
+        fontSmoothing: 'antialiased',
+        fontSize: '19px',
+        '::placeholder': {
+          color: 'purple'
+        }
+      }
+    };
+
+    this.card = elements.create('card', { style });
     this.card.mount(this.cardInfo.nativeElement);
 
     this.card.addEventListener('change', this.cardHandler);
@@ -36,7 +50,8 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     this.card.destroy();
   }
 
-  onChange({ error }) {
+  onChange({ error, ...rest }) {
+    console.log(rest);
     if (error) {
       this.error = error.message;
     } else {
@@ -46,6 +61,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
   }
 
   async onSubmit(form: NgForm) {
+    console.log(this.cardInfo);
     const { token, error } = await stripe.createToken(this.card);
 
     if (error) {
